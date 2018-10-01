@@ -40,47 +40,74 @@
     return $message;
   }
 
-  function billCreate(){
-    require "assets/config/php/config.php";
+  function billCreate()
+    {
+      require "assets/config/php/config.php";
 
-    $message="";
-    if(isset($_POST['creer'])){
+      $data=array();
+      $error=array();$errorMessage=array("","","","","");
+      $message="";
+      if(isset($_POST['creer']))
+        {
 
-      $date = inputFilter($_POST["date"]);
-      $object = inputFilter($_POST["object"]);
-      $company = inputFilter($_POST["company"]);
-      $person = inputFilter($_POST["person"]);
+          $date = inputFilter($_POST["date"]);
+          $object = inputFilter($_POST["object"]);
+          $company = inputFilter($_POST["company"]);
+          $person = inputFilter($_POST["person"]);
 
-      if (filter_var($date, FILTER_SANITIZE_STRING)) {
-        $date_valid = $date;
-      }
-      if (filter_var($object, FILTER_SANITIZE_STRING)) {
-          $object_valid = $object;
-      }
-      if (filter_var($company, FILTER_SANITIZE_NUMBER_INT)) {
-          $company_valid = $company;
-      }
-      if (filter_var($person, FILTER_SANITIZE_NUMBER_INT)) {
-          $person_valid = $person;
-      }
+          if (filter_var($date, FILTER_SANITIZE_STRING)) {
+              $date_valid = $date;
+            }else{
+              $error['0']="error on date";
+              $errorMessage['0']="mauvaise date";
+            }
+          if (filter_var($object, FILTER_SANITIZE_STRING)) {
+              $object_valid = $object;
+            }else{
+              $error['1']="error on object";
+              $errorMessage['1']="mauvaise object";
+            }
 
-      $requestSQL=
-        "INSERT INTO bill (date, object, company, person)
-          VALUES ( :date, :object, :company, :person);";
+          $company_san=filter_var($company, FILTER_SANITIZE_NUMBER_INT);
+              if (filter_var($company_san, FILTER_VALIDATE_INT)) 
+                {
+                  $company_valid = $company_san;
+                }
+              else{
+                $error['2']="error on company";
+                $errorMessage['2']="mauvaise société";
+              }
+          $person_san=filter_var($person, FILTER_SANITIZE_NUMBER_INT);
+              if (filter_var($person_san, FILTER_VALIDATE_INT)) 
+                {
+                  $person_valid = $person_san;
+                }
+              else{
+                $error['3']="error on personne";
+                $errorMessage['3']="mauvaise personne";
+              }
+          if(isset($error))
+            {
+              $requestSQL=
+                "INSERT INTO bill (date, object, company, person)
+                  VALUES ( :date, :object, :company, :person);";
 
-      $requete = $pdo->prepare($requestSQL);
+              $requete = $pdo->prepare($requestSQL);
 
-      $requete->bindParam(":date", $date_valid);
-      $requete->bindParam(":object", $object_valid);
-      $requete->bindParam(":company", $company_valid);
-      $requete->bindParam(":person", $person_valid);
+              $requete->bindParam(":date", $date_valid);
+              $requete->bindParam(":object", $object_valid);
+              $requete->bindParam(":company", $company_valid);
+              $requete->bindParam(":person", $person_valid);
 
-      $requete->execute();
-      $message="La Facture a été ajoutée avec succès.";
-      $requete->closeCursor();
+              $requete->execute();
+              $message="La Facture a été ajoutée avec succès.";
+              $requete->closeCursor();
+            }
+        }
+      $data['0']=$message;
+      $data['1']=$errorMessage;
+      return $data;
     }
-    return $message;
-  }
 
 
   function typeDataBill(){
@@ -117,50 +144,80 @@
 
 
   function billUpdate(){
-    $data=array();
+    $error=array();
     $message="";
-    $data=array();
+    $errorMessage=array("","","","","");
     require "assets/config/php/config.php";
-    if(isset($_POST['modifier'])) {
-      $number=$_GET['number'];
+    $number=inputFilter($_GET['number']);
+    if(isset($_POST['modifier'])) 
+      {
+        
 
-      $date = inputFilter($_POST["date"]);
-      $object = inputFilter($_POST["object"]);
-      $phone = inputFilter($_POST["phone"]);
-      $company = inputFilter($_POST["company"]);
-      $person = inputFilter($_POST["person"]);
+        $date = inputFilter($_POST["date"]);
+        $object = inputFilter($_POST["object"]);
+        $company = inputFilter($_POST["company"]);
+        $person = inputFilter($_POST["person"]);
 
-      if (filter_var($date, FILTER_SANITIZE_STRING)) {
-        $date_valid = $date;
+        if (filter_var($date, FILTER_SANITIZE_STRING)) 
+          {
+            $date_valid = $date;
+          }
+        else
+          {
+            $error['0']="error on date";
+            $errorMessage['0']="mauvaise date";
+          }
+
+        if (filter_var($object, FILTER_SANITIZE_STRING)) 
+          {
+            $object_valid = $object;
+          }
+        else
+          {
+            $error['1']="error on object";
+            $errorMessage['1']="mauvaise object";
+          }
+
+        $company_san=filter_var($company, FILTER_SANITIZE_NUMBER_INT);
+        if (filter_var($company_san, FILTER_VALIDATE_INT)) 
+          {
+            $company_valid = $company_san;
+          }
+        else
+          {
+            $error['2']="error on company";
+            $errorMessage['2']="mauvaise société";
+          }
+        $person_san=filter_var($person, FILTER_SANITIZE_NUMBER_INT);
+        if (filter_var($person_san, FILTER_VALIDATE_INT)) 
+          {
+            $person_valid = $person_san;
+          }
+        else
+          {
+            $error['3']="error on personne";
+            $errorMessage['3']="mauvaise personne";
+          }
+        if(isset($error))
+          {
+
+            $requestSQL=
+              "UPDATE bill
+              SET date=:date, object=:object, company=:company, person=:person
+              WHERE number = $number";
+
+            $requete = $pdo->prepare($requestSQL);
+
+            $requete->bindParam(":date", $date_valid);
+            $requete->bindParam(":object", $object_valid);
+            $requete->bindParam(":company", $company_valid);
+            $requete->bindParam(":person", $person_valid);
+
+            $requete->execute();
+            $requete->closeCursor();
+            $message="Vous avez modifié la facture";
+          }
       }
-      if (filter_var($object, FILTER_SANITIZE_STRING)) {
-          $object_valid = $object;
-      }
-      if (filter_var($company, FILTER_SANITIZE_NUMBER_INT)) {
-          $company_valid = $company;
-      }
-      if (filter_var($person, FILTER_SANITIZE_NUMBER_INT)) {
-          $person_valid = $person;
-      }
-
-      $requestSQL=
-        "UPDATE bill
-        SET date=:date, object=:object, company=:company, person=:person
-        WHERE number = $number";
-
-      $requete = $pdo->prepare($requestSQL);
-
-      $requete->bindParam(":date", $date_valid);
-      $requete->bindParam(":object", $object_valid);
-      $requete->bindParam(":company", $company_valid);
-      $requete->bindParam(":person", $person_valid);
-
-      $requete->execute();
-      $requete->closeCursor();
-      $message="Vous avez modifié la facture";
-    }else {
-      $number=$_GET['number']; //variable de defaut pour le test remplacer par la variable qu'on va recuperer plutart
-    }
     $selectCompany=array();
     $selectPerson=array();
     $requestSQL=
@@ -202,7 +259,7 @@
     $data['3']=$selectCompany;
     $data['4']=$selectPerson;
     $data['5']=$message;
-
+    $data['6']=$errorMessage;
     return $data;
   }
 

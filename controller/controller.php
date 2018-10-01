@@ -82,16 +82,20 @@
     //// ADMIN ////
     function addPersonAdminPage() {
         require "models/person.model.php";
-        $person = getAddPerson();
+        $data=getAddPerson();
+        $message = $data['0'];
+        $errorMessage = $data['1'];
         $getCompany = getCompanyName();
         require "views/admin/addPerson.view.php";
     }
 
     function updatePersonAdminPage() {
         require "models/person.model.php";
-        $personUp = getUpdatePerson();
+        $data=getUpdatePerson();
+        $message = $data['0'];
+        $errorMessage = $data['1'];
         $getPerson = getUpdateDetailPerson();
-        $message = getCompanyName();
+        $getCompany = getCompanyName();
         require "views/admin/updatePerson.view.php";
     }
 
@@ -103,7 +107,9 @@
 
     function addCompanyAdminPage() { //companyAddPage
         require "models/company.model.php";
-        $message=companyCreate();
+        $data=companyCreate();
+        $message=$data['0'];
+        $errorMessage=$data['1'];
         $donneesInfoType=lireTypeCompany();
         $type=$donneesInfoType['0'];
         $checkType=$donneesInfoType['1'];
@@ -117,6 +123,7 @@
         $checkType=$donneesCompanyModife['1'];
         $type=$donneesCompanyModife['2'];
         $message=$donneesCompanyModife['3'];
+        $errorMessage=$donneesCompanyModife['4'];
         require "views/admin/updateCompany.view.php";
 
     }
@@ -129,7 +136,9 @@
 
     function addBillAdminPage() {
         require "models/bill.model.php";
-        $message=billCreate();
+        $data=billCreate();
+        $message=$data['0'];
+        $errorMessage=$data['1'];
         $typeDataBill=typeDataBill();
         $company=$typeDataBill['0'];
         $person=$typeDataBill['1'];
@@ -144,6 +153,7 @@
         $selectCompany=$donneesBillModife['3'];
         $selectPerson=$donneesBillModife['4'];
         $message=$donneesBillModife['5'];
+        $errorMessage=$data['6'];
         require "views/admin/updateBill.view.php";       
     }
     function deleteBillAdminPage() {

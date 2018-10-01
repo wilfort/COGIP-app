@@ -1,76 +1,128 @@
 <?php
+  function inputFilter($data) {
+    $data = trim($data);
+    $data = stripslashes($data);
+    $data = htmlspecialchars($data);
 
+    return $data;
+  }
   function companyCreate() {
+      $error=array();$errorMessage=array("","","","","","","","","");
       require "assets/config/php/config.php";
       $message="";
       if(isset($_POST['creer'])) {
-        $name=$_POST['name'];
-        if (filter_var($name, FILTER_SANITIZE_STRING)) 
-        {
-          $name_valid = $name;
-        }
-        $street=$_POST['street'];
-        if (filter_var($street, FILTER_SANITIZE_STRING)) 
-        {
-          $street_valid = $street;
-        }
-        $number=$_POST['number'];
-        if (filter_var($number, FILTER_SANITIZE_NUMBER_INT)) 
-        {
-          $number_valid = $number;
-        }
-        $zip=$_POST['zip'];
-        if (filter_var($zip, FILTER_SANITIZE_NUMBER_INT)) 
-        {
-          $zip_valid = $zip;
-        }
-        $city=$_POST['city'];
-        if (filter_var($city, FILTER_SANITIZE_STRING)) 
-        {
-          $city_valid = $city;
-        }
-        $country=$_POST['country'];
-        if (filter_var($country, FILTER_SANITIZE_STRING)) 
-        {
-          $country_valid = $country;
-        }
-        $VAT=$_POST['VAT'];
-        if (filter_var($VAT, FILTER_SANITIZE_NUMBER_INT)) 
-        {
-          $VAT_valid = $VAT;
-        }
-        $phone=$_POST['phone'];
-        if (filter_var($phone, FILTER_SANITIZE_NUMBER_INT)) 
-        {
-          $phone_valid = $phone;
-        }
-        $type=$_POST['type'];
-        if (filter_var($type, FILTER_SANITIZE_NUMBER_INT)) 
-        {
-          $type_valid = $type;
-        }
-        $requestSQL=
-          "INSERT INTO company (name, street, number, zip, city, country, VAT, phone, type)
-          VALUES (:name, :street, :number, :zip, :city, :country, :VAT, :phone, :type);";
+        $name=inputFilter($_POST['name']);
+          if (filter_var($name, FILTER_SANITIZE_STRING)) 
+            {
+              $name_valid = $name;
+            }else{
+              $error['0']="error on name";
+              $errorMessage['0']="mauvaise name";
+            }
+        $street=inputFilter($_POST['street']);
+          if (filter_var($street, FILTER_SANITIZE_STRING)) 
+            {
+              $street_valid = $street;
+            }else{
+              $error['1']="error on street";
+              $errorMessage['1']="mauvaise street";
+            }
+        $number=inputFilter($_POST['number']);
+          $number_san=filter_var($number, FILTER_SANITIZE_NUMBER_INT);
+          if (filter_var($number_san, FILTER_VALIDATE_INT)) 
+            {
+              $number_valid = $number_san;
+            }
+          else{
+              $error['2']="error on number";
+              $errorMessage['2']="mauvaise numéro";
+            }
 
-        $requete = $pdo->prepare($requestSQL);
+        $zip=inputFilter($_POST['zip']);
+          $zip_san=filter_var($zip, FILTER_SANITIZE_NUMBER_INT);
+          if (filter_var($zip_san, FILTER_VALIDATE_INT)) 
+            {
+              $zip_valid = $zip_san;
+            }
+          else
+            {
+              $error['3']="error on zip";
+              $errorMessage['3']="mauvaise code postal";
+            }
+        
+        $city=inputFilter($_POST['city']);
+          if (filter_var($city, FILTER_SANITIZE_STRING)) 
+            {
+              $city_valid = $city;
+            }else{
+              $error['4']="error on city";
+              $errorMessage['4']="mauvaise city";
+            }
+        $country=inputFilter($_POST['country']);
+          if (filter_var($country, FILTER_SANITIZE_STRING)) 
+            {
+              $country_valid = $country;
+            }else{
+              $error['5']="error on country";
+              $errorMessage['5']="mauvaise country";
+            }
+        $VAT=inputFilter($_POST['VAT']);   
+          $VAT_san=filter_var($VAT, FILTER_SANITIZE_NUMBER_INT);
+          if (filter_var($VAT_san, FILTER_VALIDATE_INT)) 
+            {
+              $VAT_valid = $VAT;
+            }
+          else
+            {
+              $error['6']="error on VAT";
+              $errorMessage['6']="mauvaise TVA";
+            }
+        $phone=inputFilter($_POST['phone']);
+          if (filter_var($_POST['phone'], FILTER_SANITIZE_NUMBER_INT)) 
+            {
+              $phone_valid = filter_var($_POST['phone'], FILTER_SANITIZE_NUMBER_INT);
+            }else
+            {
+              $error['7']="error on phone";
+              $errorMessage['7']="mauvaise phone";
+            }
+        $type=inputFilter($_POST['type']);
+          $type_san=filter_var($type, FILTER_SANITIZE_NUMBER_INT);
+            if (filter_var($type_san, FILTER_VALIDATE_INT)) 
+              {
+                $type_valid = $type_san;
+              }
+            else{
+              $error['8']="error on type";
+              $errorMessage['8']="mauvaise type";
+            }
+        
+        if(isset($error)){
+          $requestSQL=
+            "INSERT INTO company (name, street, number, zip, city, country, VAT, phone, type)
+            VALUES (:name, :street, :number, :zip, :city, :country, :VAT, :phone, :type);";
 
-        $requete->bindParam(":name", $name_valid);
-    		$requete->bindParam(":street", $street_valid);
-        $requete->bindParam(":number", $number_valid);
-        $requete->bindParam(":zip", $zip_valid);
-    		$requete->bindParam(":city", $city_valid);
-        $requete->bindParam(":country", $country_valid);
-        $requete->bindParam(":VAT", $VAT_valid);
-        $requete->bindParam(":phone", $phone_valid);
-        $requete->bindParam(":type", $type_valid);
+          $requete = $pdo->prepare($requestSQL);
 
-		    $requete->execute();
-		    $message="La société a été ajoutée avec succès.";
+          $requete->bindParam(":name", $name_valid);
+          $requete->bindParam(":street", $street_valid);
+          $requete->bindParam(":number", $number_valid);
+          $requete->bindParam(":zip", $zip_valid);
+          $requete->bindParam(":city", $city_valid);
+          $requete->bindParam(":country", $country_valid);
+          $requete->bindParam(":VAT", $VAT_valid);
+          $requete->bindParam(":phone", $phone_valid);
+          $requete->bindParam(":type", $type_valid);
 
-        $requete->closeCursor();
+          $requete->execute();
+          $message="La société a été ajoutée avec succès.";
+
+          $requete->closeCursor();
+        }
       }
-      return $message;
+      $data['0']=$message;
+      $data['1']=$errorMessage;
+      return $data;
   }
 
   function lireTypeCompany() {
@@ -147,80 +199,123 @@
 
   function companyUpdate() {
       $data=array();
+      $error=array();$errorMessage=array("","","","","","","","","");
       $message="";
 
       require "assets/config/php/config.php";
-
+      $id=inputFilter($_GET['id']);
       if(isset($_POST['modifier']))
       {
-          $id=$_GET['id'];
-          $name=$_POST['name'];
-        if (filter_var($name, FILTER_SANITIZE_STRING)) 
-        {
-          $name_valid = $name;
-        }
-        $street=$_POST['street'];
-        if (filter_var($street, FILTER_SANITIZE_STRING)) 
-        {
-          $street_valid = $street;
-        }
-        $number=$_POST['number'];
-        if (filter_var($number, FILTER_SANITIZE_NUMBER_INT)) 
-        {
-          $number_valid = $number;
-        }
-        $zip=$_POST['zip'];
-        if (filter_var($zip, FILTER_SANITIZE_NUMBER_INT)) 
-        {
-          $zip_valid = $zip;
-        }
-        $city=$_POST['city'];
-        if (filter_var($city, FILTER_SANITIZE_STRING)) 
-        {
-          $city_valid = $city;
-        }
-        $country=$_POST['country'];
-        if (filter_var($country, FILTER_SANITIZE_STRING)) 
-        {
-          $country_valid = $country;
-        }
-        $VAT=$_POST['VAT'];
-        if (filter_var($VAT, FILTER_SANITIZE_NUMBER_INT)) 
-        {
-          $VAT_valid = $VAT;
-        }
-        $phone=$_POST['phone'];
-        if (filter_var($phone, FILTER_SANITIZE_NUMBER_INT)) 
-        {
-          $phone_valid = $phone;
-        }
-        $type=$_POST['type'];
-        if (filter_var($type, FILTER_SANITIZE_NUMBER_INT)) 
-        {
-          $type_valid = $type;
-        }
-          $requestSQL=
-            "UPDATE company
-            SET name=:name, street=:street, number=:number, zip=:zip, city=:city, country=:country, VAT=:VAT, phone=:phone, type=:type
-            WHERE id = $id";
-          $requete = $pdo->prepare($requestSQL);
+        
+        $name=inputFilter($_POST['name']);
+          if (filter_var($name, FILTER_SANITIZE_STRING)) 
+            {
+              $name_valid = $name;
+            }else{
+              $error['0']="error on name";
+              $errorMessage['0']="mauvaise name";
+            }
+        $street=inputFilter($_POST['street']);
+          if (filter_var($street, FILTER_SANITIZE_STRING)) 
+            {
+              $street_valid = $street;
+            }else{
+              $error['1']="error on street";
+              $errorMessage['1']="mauvaise street";
+            }
+        $number=inputFilter($_POST['number']);
+          $number_san=filter_var($number, FILTER_SANITIZE_NUMBER_INT);
+          if (filter_var($number_san, FILTER_VALIDATE_INT)) 
+            {
+              $number_valid = $number_san;
+            }
+          else{
+              $error['2']="error on number";
+              $errorMessage['2']="mauvaise numéro";
+            }
 
-          $requete->bindParam(":name", $name_valid);
-          $requete->bindParam(":street", $street_valid);
-          $requete->bindParam(":number", $number_valid);
-          $requete->bindParam(":zip", $zip_valid);
-          $requete->bindParam(":city", $city_valid);
-          $requete->bindParam(":country", $country_valid);
-          $requete->bindParam(":VAT", $VAT_valid);
-          $requete->bindParam(":phone", $phone_valid);
-          $requete->bindParam(":type", $type_valid );
+        $zip=inputFilter($_POST['zip']);
+          $zip_san=filter_var($zip, FILTER_SANITIZE_NUMBER_INT);
+          if (filter_var($zip_san, FILTER_VALIDATE_INT)) 
+            {
+              $zip_valid = $zip_san;
+            }
+          else
+            {
+              $error['3']="error on zip";
+              $errorMessage['3']="mauvaise code postal";
+            }
+        
+        $city=inputFilter($_POST['city']);
+          if (filter_var($city, FILTER_SANITIZE_STRING)) 
+            {
+              $city_valid = $city;
+            }else{
+              $error['4']="error on city";
+              $errorMessage['4']="mauvaise city";
+            }
+        $country=inputFilter($_POST['country']);
+          if (filter_var($country, FILTER_SANITIZE_STRING)) 
+            {
+              $country_valid = $country;
+            }else{
+              $error['5']="error on country";
+              $errorMessage['5']="mauvaise country";
+            }
+        $VAT=inputFilter($_POST['VAT']);   
+          $VAT_san=filter_var($VAT, FILTER_SANITIZE_NUMBER_INT);
+          if (filter_var($VAT_san, FILTER_VALIDATE_INT)) 
+            {
+              $VAT_valid = $VAT;
+            }
+          else
+            {
+              $error['6']="error on VAT";
+              $errorMessage['6']="mauvaise TVA";
+            }
+        $phone=inputFilter($_POST['phone']);
+          if (filter_var($_POST['phone'], FILTER_SANITIZE_NUMBER_INT)) 
+            {
+              $phone_valid = filter_var($_POST['phone'], FILTER_SANITIZE_NUMBER_INT);
+            }else
+            {
+              $error['7']="error on phone";
+              $errorMessage['7']="mauvaise phone";
+            }
+        $type=inputFilter($_POST['type']);
+          $type_san=filter_var($type, FILTER_SANITIZE_NUMBER_INT);
+            if (filter_var($type_san, FILTER_VALIDATE_INT)) 
+              {
+                $type_valid = $type_san;
+              }
+            else{
+              $error['8']="error on type";
+              $errorMessage['8']="mauvaise type";
+            }
+        
+        if(isset($error))
+          {
+            $requestSQL=
+              "UPDATE company
+              SET name=:name, street=:street, number=:number, zip=:zip, city=:city, country=:country, VAT=:VAT, phone=:phone, type=:type
+              WHERE id = $id";
+            $requete = $pdo->prepare($requestSQL);
 
-          $requete->execute();
+            $requete->bindParam(":name", $name_valid);
+            $requete->bindParam(":street", $street_valid);
+            $requete->bindParam(":number", $number_valid);
+            $requete->bindParam(":zip", $zip_valid);
+            $requete->bindParam(":city", $city_valid);
+            $requete->bindParam(":country", $country_valid);
+            $requete->bindParam(":VAT", $VAT_valid);
+            $requete->bindParam(":phone", $phone_valid);
+            $requete->bindParam(":type", $type_valid );
 
-          $requete->closeCursor();
-          $message="Vous avez modifier la société";
-      }else{
-          $id=$_GET['id']; //variable de defaut pour le test remplacer par la variable qu'on va recuperer plus tard
+            $requete->execute();
+
+            $requete->closeCursor();
+            $message="Vous avez modifier la société";
+          }
       }
       $checkType=array();
           $requestSQL=
@@ -264,7 +359,7 @@
           $data['1']=$checkType;
           $data['2']=$type;
           $data['3']=$message;
-
+          $data['4']=$errorMessage;
           return $data;
    }
 
